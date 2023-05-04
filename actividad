@@ -1,0 +1,56 @@
+CREATE DATABASE tablero;
+CREATE USER 'tabla'@'localhost' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON tablero.* TO 'tabla'@'localhost';
+
+use tablero;
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido VARCHAR(50) NOT NULL,
+    contrasena VARCHAR(100) NOT NULL,
+    zona_horaria VARCHAR(50) DEFAULT 'UTC-3',
+    genero ENUM('masculino', 'femenino', 'otro') NOT NULL,
+    telefono VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE ingresos (
+    id_ingreso INT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    fecha_hora_ingreso DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+);
+
+ALTER TABLE usuarios MODIFY zona_horaria VARCHAR(50) DEFAULT 'UTC-2';
+
+INSERT INTO usuarios (nombre, apellido, contrasena, genero, telefono)
+VALUES 
+    ('Juan', 'Pérez', 'clave123', 'masculino', '111-1111'),
+    ('María', 'García', 'password123', 'femenino', '222-2222'),
+    ('Pedro', 'Ramírez', 'qwerty', 'masculino', '333-3333'),
+    ('Laura', 'López', 'abcde', 'femenino', '444-4444'),
+    ('Carlos', 'González', 'contraseña', 'masculino', '555-5555'),
+    ('Ana', 'Martínez', 'abcd1234', 'femenino', '666-6666'),
+    ('Miguel', 'Ruiz', '123456', 'masculino', '777-7777'),
+    ('Lucía', 'Sánchez', 'pass1234', 'femenino', '888-8888');
+
+INSERT INTO ingresos (id_usuario) VALUES (1), (2), (3), (4), (5), (6), (7), (8);
+
+CREATE TABLE Contactos (
+id_contacto INT AUTO_INCREMENT PRIMARY KEY,
+id_usuario INT NOT NULL,
+numero_de_telefono VARCHAR(20) NOT NULL,
+correo_electronico VARCHAR(50) NOT NULL,
+FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario)
+);
+
+ALTER TABLE usuarios ADD COLUMN id_contacto INT;
+ALTER TABLE usuarios ADD UNIQUE KEY unique_telefono (telefono);
+
+UPDATE usuarios
+INNER JOIN Contactos ON usuarios.telefono = Contactos.telefono
+SET usuarios.id_contacto = Contactos.id_contacto;
+
+ALTER TABLE Contactos MODIFY telefono VARCHAR(20) UNIQUE;
+
+ALTER TABLE Contactos ADD FOREIGN KEY (id_usuario) REFERENCES Usuarios(id_usuario);
+ALTER TABLE Contactos ADD CONSTRAINT fk_contacto_usuario UNIQUE (id_usuario, telefono);
